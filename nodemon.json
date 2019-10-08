@@ -1,0 +1,6 @@
+{
+  "env" : {
+    "DBNAME" : "ticketDada-serv",
+    "PORT" : 3000
+  }
+}
