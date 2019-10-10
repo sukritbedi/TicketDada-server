@@ -1,38 +1,98 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
-
+const Movie = require('../models/movie');
 
 router.get('/', (req, res, next) =>{
-  res.status(200).json({
-    message: 'Hello Boy'
-  });
+  Movie.find()
+  .exec()
+  .then(docs => {
+    console.log(docs);
+    const response = {
+      count: docs.length,
+      movies: docs
+    }
+    res.status(200).json(response);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err})
+  })
 });
 
 router.post('/', (req, res, next) =>{
-  res.status(200).json({
-    message: 'Hello Boy'
+  const movie = new Movie({
+    _id: new mongoose.Types.ObjectId(),
+    name: req.body.name,
+    runtime: req.body.runtime,
+    imdb_rating: parseFloat(req.body.imdb_rating),
+    rotten_tomato_rating: parseFloat(req.body.rt_rating),
+    age_rating: parseFloat(req.body.age_rating),
+    image_source: req.body.imgsrc,
+    description: req.body.description
   });
+  movie.save()
+    .then(result => {
+      console.log(result);
+      res.status(201).json({
+        createdMovie: movie
+      })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({error: err});
+    });
+  });
+
+
 });
 
 router.get('/:movieId', (req, res, next) =>{
   const id = req.params.movieId;
-  res.status(200).json({
-    message: 'Hello Boy'
-  });
+  Movie.findById(id)
+  .exec()
+  .then(doc => {
+    console.log(doc);
+    if(doc){
+      res.status(200).json(doc);
+    } else {
+      res.status(404).json({message: 'No valid entry found for provided ID'});
+    }
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
+  })
 });
 
 router.patch('/:movieId', (req, res, next) =>{
   const id = req.params.movieId;
-  res.status(200).json({
-    message: 'Hello Boy'
+  const updateOps = {};
+  for(const ops of req.body) {
+    updateOps[ops.propName] = ops.value;
+  }
+  Movie.update({_id: id}, { $set: updateOps})
+  .exec()
+  .then(result => {
+    console.log(result);
+    res.status(200).json(result);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
   });
 });
 
 router.delete('/:movieId', (req, res, next) =>{
   const id = req.params.movieId;
-  res.status(200).json({
-    message: 'Hello Boy'
+  Movie.remove({_id: id})
+  .exec()
+  .then(result => {
+    res.status(200).json(result);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
   });
 });
 

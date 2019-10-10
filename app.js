@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const movieRoutes = require('./api/routes/movies');
 const transactionRoutes = require('./api/routes/transactions');
+const userRoutes = require('./api/routes/users');
 
 mongoose.connect('mongodb://localhost/' + process.env.DBNAME, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 
 app.use('/movie', movieRoutes);
 app.use('/transaction', transactionRoutes);
+app.use('/user', userRoutes);
 
 app.use((req, res, next) => {
   const error = new Error('Not Found');
