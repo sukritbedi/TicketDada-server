@@ -1,6 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function(req, file, cb) {
+        const now = new Date().toISOString();
+        const date = now.replace(/:/g, '-');
+        cb(null, date + file.originalname);
+    }
+});
+
+const upload = multer({storage: storage});
 
 const Movie = require('../models/movie');
 
@@ -21,7 +35,8 @@ router.get('/', (req, res, next) =>{
   })
 });
 
-router.post('/', (req, res, next) =>{
+router.post('/', upload.single('movieImage'), (req, res, next) =>{
+  console.log(req.file);
   const movie = new Movie({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
@@ -29,8 +44,8 @@ router.post('/', (req, res, next) =>{
     imdb_rating: parseFloat(req.body.imdb_rating),
     rotten_tomato_rating: parseFloat(req.body.rt_rating),
     age_rating: parseFloat(req.body.age_rating),
-    image_source: req.body.imgsrc,
-    description: req.body.description
+    description: req.body.description,
+    image_source: req.file.path
   });
   movie.save()
     .then(result => {

@@ -12,6 +12,7 @@ const userRoutes = require('./api/routes/users');
 mongoose.connect('mongodb://localhost/' + process.env.DBNAME, {useNewUrlParser: true, useUnifiedTopology: true});
 
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 
