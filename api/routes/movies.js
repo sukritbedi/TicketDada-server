@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const checkAuthAdminOnly = require('../middleware/auth-admin');
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -22,7 +23,6 @@ router.get('/', (req, res, next) =>{
   Movie.find()
   .exec()
   .then(docs => {
-    console.log(docs);
     const response = {
       count: docs.length,
       movies: docs
@@ -35,21 +35,20 @@ router.get('/', (req, res, next) =>{
   })
 });
 
-router.post('/', upload.single('movieImage'), (req, res, next) =>{
+router.post('/', checkAuthAdminOnly, upload.single('movieImage'), (req, res, next) =>{
   console.log(req.file);
   const movie = new Movie({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
     runtime: req.body.runtime,
     imdb_rating: parseFloat(req.body.imdb_rating),
-    rotten_tomato_rating: parseFloat(req.body.rt_rating),
+    rt_rating: parseFloat(req.body.rt_rating),
     age_rating: parseFloat(req.body.age_rating),
     description: req.body.description,
     image_source: req.file.path
   });
   movie.save()
     .then(result => {
-      console.log(result);
       res.status(201).json({
         createdMovie: movie
       })
@@ -67,7 +66,6 @@ router.get('/:movieId', (req, res, next) =>{
   Movie.findById(id)
   .exec()
   .then(doc => {
-    console.log(doc);
     if(doc){
       res.status(200).json(doc);
     } else {
@@ -80,16 +78,15 @@ router.get('/:movieId', (req, res, next) =>{
   })
 });
 
-router.patch('/:movieId', (req, res, next) =>{
+router.patch('/:movieId', checkAuthAdminOnly, (req, res, next) =>{
   const id = req.params.movieId;
   const updateOps = {};
-  for(const ops of req.body) {
+  for(const ops of req.body.datas) {
     updateOps[ops.propName] = ops.value;
   }
   Movie.update({_id: id}, { $set: updateOps})
   .exec()
   .then(result => {
-    console.log(result);
     res.status(200).json(result);
   })
   .catch(err => {
@@ -98,9 +95,9 @@ router.patch('/:movieId', (req, res, next) =>{
   });
 });
 
-router.delete('/:movieId', (req, res, next) =>{
+router.delete('/:movieId', checkAuthAdminOnly, (req, res, next) =>{
   const id = req.params.movieId;
-  Movie.remove({_id: id})
+  Movie.deleteOne({_id: id})
   .exec()
   .then(result => {
     res.status(200).json(result);
