@@ -80,10 +80,16 @@ router.get('/:movieId', (req, res, next) =>{
 
 router.patch('/:movieId', checkAuthAdminOnly, (req, res, next) =>{
   const id = req.params.movieId;
-  const updateOps = {};
-  for(const ops of req.body.datas) {
-    updateOps[ops.propName] = ops.value;
-  }
+  const updateOps = {
+    name: req.body.name,
+    runtime: req.body.runtime,
+    imdb_rating: req.body.imdb_rating,
+    rt_rating: req.body.rt_rating,
+    age_rating: req.body.age_rating,
+    image_source: req.body.image_source,
+    description: req.body.description
+  };
+
   Movie.update({_id: id}, { $set: updateOps})
   .exec()
   .then(result => {

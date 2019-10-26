@@ -3,6 +3,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const checkAuthAdminOnly = require('../middleware/auth-admin');
+const checkAuthAdminUserComp = require('../middleware/auth-admin-user-compound');
 
 const User = require('../models/user')
 
@@ -25,9 +27,9 @@ router.post('/signup',(req, res, next) => {
             _id: new mongoose.Types.ObjectId(),
             name: req.body.name,
             phone_number: req.body.phoneNum,
-            email_id: req.body.email,
+            email_id: req.body.email_id,
             password: hash,
-            type: req.body.userType
+            type: req.body.type
           });
           user
           .save()
@@ -57,18 +59,19 @@ router.post('/signup',(req, res, next) => {
 });
 
 router.post('/login', (req, res, next) => {
-  User.find({email_id: req.body.email})
+  User.find({email_id: req.body.email_id})
   .exec()
   .then(user => {
     if(user.length < 1) {
       return res.status(401).json({
-        message: 'Auth Failed'
+        message: 'Auth Failed1',
+        result: user
       });
     }
     bcrypt.compare(req.body.password, user[0].password, (err, result) => {
       if(err) {
         return res.status(401).json({
-          message: 'Auth Failed'
+          message: 'Auth Failed2'
         });
       }
       if(result) {
@@ -90,7 +93,7 @@ router.post('/login', (req, res, next) => {
   .catch()
 })
 
-router.delete('/:userId', (req, res, next) => {
+router.delete('/:userId', checkAuthAdminOnly, (req, res, next) => {
   User.remove({_id: req.params.userId})
   .exec()
   .then(result => {
@@ -106,5 +109,59 @@ router.delete('/:userId', (req, res, next) => {
     });
   });
 });
+
+router.get('/', checkAuthAdminOnly, (req, res, next) => {
+  User.find()
+  .exec()
+  .then(docs => {
+    const response = {
+      count: docs.length,
+      users: docs
+    }
+    res.status(200).json(response);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err})
+  })
+})
+
+router.get('/:userID', checkAuthAdminUserComp, (req, res, next) => {
+  const id = req.params.userID;
+  User.findById({_id: id})
+  .exec()
+  .then(doc => {
+    if(doc){
+      res.status(200).json(doc);
+    } else {
+      res.status(404).json({message: 'No valid entry found for provided ID'});
+    }
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
+  })
+})
+
+router.patch('/:userID', checkAuthAdminUserComp, (req, res, next) => {
+  const id = req.params.userID;
+  const updateOps = {
+    name: req.body.name,
+    phone_number: req.body.phone_number,
+    email_id: req.body.email_id,
+    type: req.body.type
+  };
+
+  User.update({_id: id}, { $set: updateOps})
+  .exec()
+  .then(result => {
+    res.status(200).json(result);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
+  });
+});
+
 
 module.exports = router;
