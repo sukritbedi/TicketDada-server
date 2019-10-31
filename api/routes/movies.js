@@ -86,7 +86,6 @@ router.patch('/:movieId', checkAuthAdminOnly, (req, res, next) =>{
     imdb_rating: req.body.imdb_rating,
     rt_rating: req.body.rt_rating,
     age_rating: req.body.age_rating,
-    image_source: req.body.image_source,
     description: req.body.description
   };
 

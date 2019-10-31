@@ -64,14 +64,14 @@ router.post('/login', (req, res, next) => {
   .then(user => {
     if(user.length < 1) {
       return res.status(401).json({
-        message: 'Auth Failed1',
-        result: user
+        message: 'Auth Failed'
       });
     }
+    console.log(user);
     bcrypt.compare(req.body.password, user[0].password, (err, result) => {
       if(err) {
         return res.status(401).json({
-          message: 'Auth Failed2'
+          message: 'Auth Failed'
         });
       }
       if(result) {
@@ -83,14 +83,32 @@ router.post('/login', (req, res, next) => {
         {
           expiresIn: "1h"
         })
-        return res.status(200).json({
-          message: 'Auth Successful',
-          token: token
-        })
+        if(user[0].type===1){
+          return res.status(200).json({
+            message: 'Auth Successful',
+            token: token,
+            url: 'admin'
+          })
+        } else {
+          return res.status(200).json({
+            message: 'Auth Successful',
+            token: token,
+            url: 'main'
+          })
+        }
+
+      } else {
+        return res.status(401).json({
+          message: 'Auth Failed',
+        });
       }
     })
   })
-  .catch()
+  .catch(err => {
+    res.response(401).json({
+      message: 'Auth Failed'
+    });
+  })
 })
 
 router.delete('/:userId', checkAuthAdminOnly, (req, res, next) => {
