@@ -5,8 +5,8 @@ const transactionSchema = mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   movie_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Movie'},
   cinema: Number,
-  timestamp: Timestamp,
+  timestamp: {type: Date, default: Date.now},
   movie_timings: String
 })
 
-module.exports = mongoose.model('Transaction', userSchema);
+module.exports = mongoose.model('Transaction', transactionSchema);
