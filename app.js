@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-
 const movieRoutes = require('./api/routes/movies');
 const transactionRoutes = require('./api/routes/transactions');
 const userRoutes = require('./api/routes/users');

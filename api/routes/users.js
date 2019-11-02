@@ -170,7 +170,7 @@ router.patch('/:userID', checkAuthAdminUserComp, (req, res, next) => {
     type: req.body.type
   };
 
-  User.update({_id: id}, { $set: updateOps})
+  User.updateOne({_id: id}, { $set: updateOps})
   .exec()
   .then(result => {
     res.status(200).json(result);

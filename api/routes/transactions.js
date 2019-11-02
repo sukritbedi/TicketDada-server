@@ -8,28 +8,72 @@ const checkAuthAdminUserComp = require('../middleware/auth-admin-user-compound')
 const Transaction = require('../models/transaction');
 
 router.get('/', checkAuthAdminOnly, (req, res, next) =>{
-  res.status(200).json({
-    message: 'Hello Boy'
-  });
+  Transaction.find()
+  .exec()
+  .then(docs => {
+    const response = {
+      count: docs.length,
+      users: docs
+    }
+    res.status(200).json(response);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err})
+  })
 });
 
 router.post('/', checkAuthUserOnly, (req, res, next) =>{
-  res.status(200).json({
-    message: 'Hello Boy'
+  const trans = new Transaction({
+    _id: new mongoose.Types.ObjectId(),
+    user_id: decoded._id,
+    movie_id: req.body.movie_id,
+    cinema: req.body.cinema,
+    timestamp: req.body.timestamp,
+    movie_timings: req.body.movie_timings
+  })
+  trans.save()
+  .then(result => {
+    console.log(result);
+    res.status(201).json({
+      message:'Transaction recorded'
+    })
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({
+      error: err
+    });
   });
 });
 
 router.get('/:transId', checkAuthAdminUserComp, (req, res, next) =>{
   const id = req.params.transId;
-  res.status(200).json({
-    message: 'Hello Boy'
-  });
+  Transaction.findById({_id: id})
+  .exec()
+  .then(doc => {
+    if(doc){
+      res.status(200).json(doc);
+    } else {
+      res.status(404).json({message: 'No valid entry found for provided ID'});
+    }
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
+  })
 });
 
 router.delete('/:transId', checkAuthAdminUserComp, (req, res, next) =>{
   const id = req.params.transId;
-  res.status(200).json({
-    message: 'Hello Boy'
+  Transaction.deleteOne({_id: id})
+  .exec()
+  .then(result => {
+    res.status(200).json(result);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json({error: err});
   });
 });
 
