@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const checkAuthAdminOnly = require('../middleware/auth-admin');
 const checkAuthAdminUserComp = require('../middleware/auth-admin-user-compound');
 
-const User = require('../models/user')
+const User = require('../models/user');
 
 router.post('/signup',(req, res, next) => {
   User.find({email_id: req.body.email})
@@ -29,12 +29,11 @@ router.post('/signup',(req, res, next) => {
             phone_number: req.body.phoneNum,
             email_id: req.body.email_id,
             password: hash,
-            type: req.body.type
+            type: 0
           });
           user
           .save()
           .then(result => {
-
             console.log(result);
             res.status(201).json({
               message:'User Created'

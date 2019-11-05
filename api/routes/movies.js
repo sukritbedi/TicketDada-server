@@ -36,6 +36,7 @@ router.get('/', (req, res, next) =>{
 });
 
 router.post('/', checkAuthAdminOnly, upload.single('movieImage'), (req, res, next) =>{
+  console.log(req.body);
   console.log(req.file);
   const movie = new Movie({
     _id: new mongoose.Types.ObjectId(),
@@ -53,6 +54,7 @@ router.post('/', checkAuthAdminOnly, upload.single('movieImage'), (req, res, nex
         createdMovie: movie
       })
     .catch(err => {
+      console.log("Error by part2");
       console.log(err);
       res.status(500).json({error: err});
     });

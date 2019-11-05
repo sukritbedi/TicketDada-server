@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const checkAuthAdminOnly = require('../middleware/auth-admin');
 const checkAuthUserOnly = require('../middleware/auth-user');
 const checkAuthAdminUserComp = require('../middleware/auth-admin-user-compound');
+const jwt = require('jsonwebtoken');
 
 const Transaction = require('../models/transaction');
 
@@ -13,7 +14,7 @@ router.get('/', checkAuthAdminOnly, (req, res, next) =>{
   .then(docs => {
     const response = {
       count: docs.length,
-      users: docs
+      transactions: docs
     }
     res.status(200).json(response);
   })
@@ -24,14 +25,18 @@ router.get('/', checkAuthAdminOnly, (req, res, next) =>{
 });
 
 router.post('/', checkAuthUserOnly, (req, res, next) =>{
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_KEY);
   const trans = new Transaction({
     _id: new mongoose.Types.ObjectId(),
-    user_id: decoded._id,
+    user_id: decoded.userId,
     movie_id: req.body.movie_id,
     cinema: req.body.cinema,
     timestamp: req.body.timestamp,
-    movie_timings: req.body.movie_timings
+    movie_timings: req.body.movie_timings,
+    movie_name: req.body.movie_name
   })
+  console.log(trans);
   trans.save()
   .then(result => {
     console.log(result);
